@@ -14,6 +14,7 @@ import java.util.Optional;
 public class EditorialService {
     EditorialRepository editorialRepository;
 
+
     public ResponseEntity<List<Editorial>>verEditoriales(){//devolver todas las editoriales
         List<Editorial> editorialList = editorialRepository.findAll();
         return ResponseEntity.ok(editorialList);

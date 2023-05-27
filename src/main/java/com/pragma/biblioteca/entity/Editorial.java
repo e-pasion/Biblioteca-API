@@ -14,7 +14,7 @@ public class Editorial {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true,length = 30)
+    @Column(length = 30)
     private String nombre;
     @Column(length = 300)
     private String descripcion;

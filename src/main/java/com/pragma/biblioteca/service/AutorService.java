@@ -42,6 +42,9 @@ public class AutorService {
         else if (autorRepository.existsByPseudonimo(autor.getPseudonimo())) {
             throw new ValidacionException("El pseudonimo no puede estar repetido");
         }
+        else if (autorRepository.existsByEmail(autor.getEmail())) {
+            throw new ValidacionException("El Email no puede estar repetido");
+        }
         else if (autor.getPais().getId()==null) {
             throw new ValidacionException("Debes poner el ID del pais");
         }

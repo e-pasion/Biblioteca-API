@@ -5,8 +5,10 @@ import com.pragma.biblioteca.service.AutorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,7 @@ public class AutorController {
             "-De cada autor se desea conocer: nombre, apellido, pseudonimo (campo unico), email (validar estructura de email)" +
             "-cada autor debe tener nombre y apellido o pseudonimo.")
 
-    public ResponseEntity<Autor> crearAutor( @RequestBody Autor autor){
-        return autorService.crearAutor(autor);
+    public ResponseEntity<Autor> crearAutor(@Valid @RequestBody Autor autor, BindingResult bindingResult){
+        return autorService.crearAutor(autor,bindingResult);
     }
 }

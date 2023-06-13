@@ -1,38 +1,50 @@
 package com.pragma.biblioteca.controller;
 
+import com.pragma.biblioteca.dto.EditorialDTO;
 import com.pragma.biblioteca.entity.Editorial;
 import com.pragma.biblioteca.service.EditorialService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/editorial")
+@Tag(name = "Editorial Controlador", description = "Controlador creado para añadir Editoriales")
 public class EditorialController {
     private EditorialService editorialService;
 
     @GetMapping
-    public ResponseEntity<List<Editorial>> verEditoriales(){
-        return editorialService.verEditoriales();
+    @Operation(summary = "Ver todas las editoriales")
+    public ResponseEntity<List<EditorialDTO>> verEditoriales(){
+        return ResponseEntity.ok(editorialService.verEditoriales());
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Editorial> verEditorial(@PathVariable Long id){
-        return editorialService.verEditorial(id);
+    @Operation(summary = "Ver una editorial")
+    public ResponseEntity<EditorialDTO> verEditorial(@PathVariable Long id){
+        return ResponseEntity.ok(editorialService.verEditorial(id));
     }
 
     @PostMapping
-    public ResponseEntity<?> crearEditorial(@RequestBody Editorial editorial){
-        return editorialService.crearEditorial(editorial);
+    @Operation(summary = "Crear una editorial")
+    public ResponseEntity<EditorialDTO> crearEditorial(@Valid @RequestBody EditorialDTO editorialDTO, BindingResult bindingResult){
+        return ResponseEntity.ok(editorialService.crearEditorial(editorialDTO, bindingResult));
     }
-    @PutMapping
-    public ResponseEntity<?> actualizarEditorial(@RequestBody Editorial editorial){
-        return editorialService.actualizarEditorial(editorial);
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar una editorial")
+    public ResponseEntity<EditorialDTO> actualizarEditorial(@PathVariable Long id, @Valid @RequestBody EditorialDTO editorialDTO, BindingResult bindingResult){
+        return ResponseEntity.ok(editorialService.actualizarEditorial(id,editorialDTO, bindingResult));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Editorial> borrarEditorial(@PathVariable Long id){
-        return editorialService.borrarEditorial(id);
+    @Operation(summary = "Borrar una editorial")
+    public ResponseEntity<EditorialDTO> borrarEditorial(@PathVariable Long id){
+        editorialService.borrarEditorial(id);
+        return ResponseEntity.noContent().build();
     }
 }

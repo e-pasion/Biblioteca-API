@@ -19,12 +19,10 @@ public class Autor {
     private String nombre;
     private String apellido;
     private String pseudonimo;
-    @NotNull(message = "El autor debe tener asignado un pais")
     @ManyToOne
     @JoinColumn(name = "pais_id")
     private Pais pais;
 
-    @NotBlank(message = "El email no puede estar vacio")
-    @Email(message = "El formato del email debe ser valido\n Ejemplo:prueba@gmail.com")
+
     private String email;
 }

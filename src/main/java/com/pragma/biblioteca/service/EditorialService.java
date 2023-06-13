@@ -1,10 +1,14 @@
 package com.pragma.biblioteca.service;
 
+import com.pragma.biblioteca.dto.EditorialDTO;
+import com.pragma.biblioteca.mapper.EditorialMapper;
 import com.pragma.biblioteca.entity.Editorial;
+import com.pragma.biblioteca.error.ValidacionException;
 import com.pragma.biblioteca.repository.EditorialRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,46 +17,54 @@ import java.util.Optional;
 @AllArgsConstructor
 public class EditorialService {
     EditorialRepository editorialRepository;
+    EditorialMapper mapper;
 
 
-    public ResponseEntity<List<Editorial>>verEditoriales(){//devolver todas las editoriales
+    public List<EditorialDTO>verEditoriales(){//devolver todas las editoriales
         List<Editorial> editorialList = editorialRepository.findAll();
-        return ResponseEntity.ok(editorialList);
+        List<EditorialDTO> editorialDTOList= mapper.toEditorialesDTO(editorialList);
+        return editorialDTOList;
     }
 
-    public ResponseEntity<Editorial> verEditorial(Long id){//devolver una editorial
+    public EditorialDTO verEditorial(Long id){//devolver una editorial
         Optional<Editorial> resultado=editorialRepository.findById(id);
-        return ResponseEntity.ok(resultado.get());
+        Editorial editorial= resultado.orElseThrow(() -> new ValidacionException("No existe ningun editorial con este id en la base de datos"));
+        EditorialDTO editorialDTO=mapper.toEditorialDTO(editorial);
+        return editorialDTO;
     }
 
-    public ResponseEntity<?> crearEditorial(Editorial editorial){//crear una editorial
-        if(editorial.getId()!=null){
-            return ResponseEntity.badRequest().body("No se permite enviar un id al crear un objeto");
-        } else if((editorial.getNombre().length()<2||editorial.getNombre().length()>30)){
-            return ResponseEntity.badRequest().body("El nombre debe estar entre 2 y 30 caracteres");
-        } else if (editorial.getDescripcion().length()>300) {
-            return ResponseEntity.badRequest().body("La descripcion no debe ser mayor a 300 caracteres");
-        } else if (editorialRepository.existsByNombre(editorial.getNombre())) {
-            return ResponseEntity.badRequest().body("El nombre que estas pasando ya existe");
-        }
+    public EditorialDTO crearEditorial(EditorialDTO editorialDTO,BindingResult bindingResult){//crear una editorial
+        if(bindingResult.hasErrors()){
+            throw new ValidacionException(bindingResult.getFieldError().getDefaultMessage());
+        }validacionEditorial(editorialDTO);
+        Editorial editorial=mapper.toEditorial(editorialDTO);
         Editorial resultado=editorialRepository.save(editorial);
-        return ResponseEntity.ok(resultado);
+        return mapper.toEditorialDTO(resultado);
     }
 
-    public ResponseEntity<?> actualizarEditorial(Editorial editorial){//actualizar una editorial
-        if(editorial.getId()==null){
-            return ResponseEntity.badRequest().body("Para actualizar tienes que pasar un ID");
-        } else if (!editorialRepository.existsById(editorial.getId())) {
-            return ResponseEntity.notFound().build();
+    public EditorialDTO actualizarEditorial(Long id,EditorialDTO editorialDTO, BindingResult bindingResult){//actualizar una editorial
+        if (!editorialRepository.existsById(id)) {
+            throw new ValidacionException("Esta editorial no existe");
         }
-        return crearEditorial(editorial);
+        else if(bindingResult.hasErrors()){
+            throw new ValidacionException(bindingResult.getFieldError().getDefaultMessage());
+        }
+        validacionEditorial(editorialDTO);
+        Editorial editorial= mapper.toEditorialConID(editorialDTO,id);
+        Editorial resultado=editorialRepository.save(editorial);
+        return mapper.toEditorialDTO(resultado);
     }
 
-    public ResponseEntity<Editorial> borrarEditorial(Long id){//borrar una editorial
-        if(editorialRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+    public void borrarEditorial(Long id){//borrar una editorial
+        if(!editorialRepository.existsById(id)) {
+            throw new ValidacionException("Esta editorial no existe");
         }
         editorialRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    }
+
+    public void validacionEditorial(EditorialDTO editorialDTO){
+         if (editorialRepository.existsByNombre(editorialDTO.getNombre())) {
+             throw new ValidacionException("Este nombre ya existe");
+        }
     }
 }
